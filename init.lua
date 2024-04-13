@@ -74,6 +74,18 @@ vim.opt.wildignorecase = true
 vim.opt.wrap = true -- false
 vim.opt.writebackup = false
 vim.g.have_nerd_font = false
+vim.g.clipboard = {
+  name = "xclip",
+  copy = {
+    ["+"] = "xclip -selection clipboard",
+    ["*"] = "xclip -selection clipboard",
+  },
+  paste = {
+    ["+"] = "xclip -selection clipboard -o",
+    ["*"] = "xclip -selection clipboard -o",
+  },
+  cache_enabled = 0,
+}
 
 -- [[ KEYMAPS ]]
 -- `:help vim.keymap.set()`
@@ -602,7 +614,7 @@ require("lazy").setup({
       })
     end,
     init = function()
-      vim.opt.background = "light"
+      vim.opt.background = "dark"
       vim.cmd.colorscheme("catppuccin")
       -- vim.cmd.hi 'Comment gui=none'
     end,
