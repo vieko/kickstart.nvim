@@ -86,6 +86,10 @@ vim.g.clipboard = {
   },
   cache_enabled = 0,
 }
+vim.g.netrw_keepdir = 0
+vim.g.netrw_winsize = 20
+vim.g.netrw_banner = 0
+vim.g.netrw_browse_split = 0
 
 -- [[ KEYMAPS ]]
 -- `:help vim.keymap.set()`
@@ -646,8 +650,8 @@ require("lazy").setup({
       local statusline = require("mini.statusline")
       local active = function()
         local mode, mode_hl = statusline.section_mode({ trunc_width = 120 })
-        local git = statusline.section_git({ trunc_width = 75, icon = "G" })
-        local diagnostics = statusline.section_diagnostics({ trunc_width = 75, icon = "*" })
+        local git = statusline.section_git({ trunc_width = 75, icon = "GIT" })
+        local diagnostics = statusline.section_diagnostics({ trunc_width = 75, icon = "LSP" })
         local filename = MiniStatusline.section_filename({ trunc_width = 140 })
         local fileinfo = statusline.section_fileinfo({ trunc_width = 120 })
         local location = statusline.section_location({ trunc_width = 75 })
