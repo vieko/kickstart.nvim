@@ -2,7 +2,6 @@
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
--- [[ OPTIONS ]]
 -- `:help vim.opt`
 vim.opt.autoindent = true
 vim.opt.backup = false
@@ -74,6 +73,8 @@ vim.opt.wildignorecase = true
 vim.opt.wrap = true -- false
 vim.opt.writebackup = false
 vim.g.have_nerd_font = false
+
+-- [[ UTILITIES ]]
 vim.g.clipboard = {
   name = "xclip",
   copy = {
@@ -86,25 +87,33 @@ vim.g.clipboard = {
   },
   cache_enabled = 0,
 }
+
+-- [[ NETRW ]]
 vim.g.netrw_keepdir = 0
 vim.g.netrw_winsize = 20
 vim.g.netrw_banner = 0
-vim.g.netrw_browse_split = 0
+vim.g.netrw_liststyle = 3
+vim.g.netrw_browse_split = 4
 
--- [[ KEYMAPS ]]
+-- [[ DISABLE BUILTINS ]]
+-- vim.g.loaded_netrw = 1
+-- vim.g.loaded_netrwplugin = 1
+-- vim.g.loaded_netrwsettings = 1
+
+-- [[ keymaps ]]
 -- `:help vim.keymap.set()`
 
 -- disable arrows
-vim.keymap.set("n", "<Up>", "")
-vim.keymap.set("n", "<Down>", "")
-vim.keymap.set("n", "<Left>", "")
-vim.keymap.set("n", "<Right>", "")
-vim.keymap.set("i", "<Up>", "")
-vim.keymap.set("i", "<Down>", "")
-vim.keymap.set("i", "<Left>", "")
-vim.keymap.set("i", "<Right>", "")
+vim.keymap.set("n", "<up>", "")
+vim.keymap.set("n", "<down>", "")
+vim.keymap.set("n", "<left>", "")
+vim.keymap.set("n", "<right>", "")
+vim.keymap.set("i", "<up>", "")
+vim.keymap.set("i", "<down>", "")
+vim.keymap.set("i", "<left>", "")
+vim.keymap.set("i", "<right>", "")
 
--- Set highlight on search, but clear on pressing <Esc> in normal mode
+-- set highlight on search, but clear on pressing <esc> in normal mode
 vim.keymap.set("n", "<Esc>", "<cmd>nohlsearch<CR>")
 
 -- move lines up and down in visual mode
@@ -241,11 +250,12 @@ require("lazy").setup({
     "lewis6991/gitsigns.nvim",
     opts = {
       signs = {
-        add = { text = "+" },
-        change = { text = "~" },
-        delete = { text = "_" },
-        topdelete = { text = "‾" },
-        changedelete = { text = "~" },
+        add = { text = "A" },
+        change = { text = "M" },
+        delete = { text = "D" },
+        topdelete = { text = "T" },
+        changedelete = { text = "C" },
+        untracked = { text = "?" },
       },
     },
   },
@@ -262,11 +272,108 @@ require("lazy").setup({
         ["<leader>d"] = { name = "[D]ocument", _ = "which_key_ignore" },
         ["<leader>r"] = { name = "[R]ename", _ = "which_key_ignore" },
         ["<leader>s"] = { name = "[S]earch", _ = "which_key_ignore" },
+        ["<leader>t"] = { name = "[T]ree", _ = "which_key_ignore" },
         ["<leader>w"] = { name = "[W]orkspace", _ = "which_key_ignore" },
       })
     end,
   },
-
+  { -- File Explorer
+    "nvim-neo-tree/neo-tree.nvim",
+    branch = "v3.x",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons", -- not strictly required, but recommended
+      "MunifTanjim/nui.nvim",
+    },
+    init = function()
+      vim.keymap.set("n", "<leader>tt", "<Cmd>Neotree reveal toggle<CR>", { desc = "toggle [T]ree" })
+    end,
+    config = function()
+      require("neo-tree").setup({
+        sources = {
+          "filesystem",
+          "buffers",
+          "git_status",
+          "document_symbols",
+        },
+        close_if_last_window = true,
+        default_component_configs = {
+          diagnostics = {
+            symbols = {
+              hint = "H",
+              info = "I",
+              warn = "W",
+              error = "E",
+            },
+            highlights = {
+              hint = "DiagnosticSignHint",
+              info = "DiagnosticSignInfo",
+              warn = "DiagnosticSignWarn",
+              error = "DiagnosticSignError",
+            },
+          },
+          modified = {
+            symbol = "[+]",
+            highlight = "NeoTreeModified",
+          },
+          name = {
+            trailing_slash = false,
+            highlight_opened_files = false,
+            use_git_status_colors = false,
+            highlight = "NeoTreeFileName",
+          },
+          git_status = {
+            symbols = {
+              added = "A",
+              modified = "M",
+              deleted = "D",
+              renamed = "R",
+              untracked = "?",
+              ignored = "!",
+              unstaged = "U",
+              staged = "S",
+              conflict = "C",
+            },
+          },
+        },
+        filesystem = {
+          hijack_netrw_behavior = "open_default",
+          filtered_items = {
+            visible = false,
+            hide_dotfiles = true,
+            hide_gitignored = true,
+            hide_hidden = true,
+            hide_by_name = {
+              "node_modules",
+            },
+            always_show = {
+              ".gitignore",
+            },
+          },
+          components = {
+            icon = function(config, node, state)
+              if node.type == "file" or node.type == "directory" then
+                return {}
+              end
+              -- if node.type == "directory" then
+              --   return {
+              --     text = "- ",
+              --     highlight = config.highlight,
+              --   }
+              -- end
+              -- if node.type == "file" then
+              --   return {
+              --     text = "* ",
+              --     highlight = config.highlight,
+              --   }
+              -- end
+              return require("neo-tree.sources.common.components").icon(config, node, state)
+            end,
+          },
+        },
+      })
+    end,
+  },
   { -- Fuzzy Finder (files, lsp, etc)
     "nvim-telescope/telescope.nvim",
     event = "VimEnter",
@@ -284,8 +391,8 @@ require("lazy").setup({
       { "nvim-tree/nvim-web-devicons", enabled = vim.g.have_nerd_font },
     },
     config = function()
-      --  - Insert mode: <c-/>
-      --  - Normal mode: ?
+      --  - insert mode: <c-/>
+      --  - normal mode: ?
       -- `:help telescope` and `:help telescope.setup()`
       require("telescope").setup({
         extensions = {
@@ -297,34 +404,34 @@ require("lazy").setup({
       pcall(require("telescope").load_extension, "fzf")
       pcall(require("telescope").load_extension, "ui-select")
 
-      -- See `:help telescope.builtin`
+      -- see `:help telescope.builtin`
       local builtin = require("telescope.builtin")
-      vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[S]earch [H]elp" })
-      vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[S]earch [K]eymaps" })
-      vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[S]earch [F]iles" })
-      vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[S]earch [S]elect Telescope" })
-      vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[S]earch current [W]ord" })
-      vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[S]earch by [G]rep" })
-      vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[S]earch [D]iagnostics" })
-      vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[S]earch [R]esume" })
-      vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
-      vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] Find existing buffers" })
+      vim.keymap.set("n", "<leader>sh", builtin.help_tags, { desc = "[s]earch [h]elp" })
+      vim.keymap.set("n", "<leader>sk", builtin.keymaps, { desc = "[s]earch [k]eymaps" })
+      vim.keymap.set("n", "<leader>sf", builtin.find_files, { desc = "[s]earch [f]iles" })
+      vim.keymap.set("n", "<leader>ss", builtin.builtin, { desc = "[s]earch [s]elect telescope" })
+      vim.keymap.set("n", "<leader>sw", builtin.grep_string, { desc = "[s]earch current [w]ord" })
+      vim.keymap.set("n", "<leader>sg", builtin.live_grep, { desc = "[s]earch by [g]rep" })
+      vim.keymap.set("n", "<leader>sd", builtin.diagnostics, { desc = "[s]earch [d]iagnostics" })
+      vim.keymap.set("n", "<leader>sr", builtin.resume, { desc = "[s]earch [r]esume" })
+      vim.keymap.set("n", "<leader>s.", builtin.oldfiles, { desc = '[s]earch recent files ("." for repeat)' })
+      vim.keymap.set("n", "<leader><leader>", builtin.buffers, { desc = "[ ] find existing buffers" })
 
       vim.keymap.set("n", "<leader>/", function()
         builtin.current_buffer_fuzzy_find(require("telescope.themes").get_dropdown({
           winblend = 10,
           previewer = false,
         }))
-      end, { desc = "[/] Fuzzily search in current buffer" })
+      end, { desc = "[/] fuzzily search in current buffer" })
 
       vim.keymap.set("n", "<leader>s/", function()
         builtin.live_grep({
           grep_open_files = true,
-          prompt_title = "Live Grep in Open Files",
+          prompt_title = "live grep in open files",
         })
-      end, { desc = "[S]earch [/] in Open Files" })
+      end, { desc = "[s]earch [/] in open files" })
 
-      -- shortcut for searching your Neovim configuration files
+      -- shortcut for searching your neovim configuration files
       vim.keymap.set("n", "<leader>sn", function()
         builtin.find_files({ cwd = vim.fn.stdpath("config") })
       end, { desc = "[S]earch [N]eovim files" })
@@ -580,6 +687,13 @@ require("lazy").setup({
             return {
               CursorLineNr = { fg = colors.peach, bold = true },
               CopilotSuggestion = { fg = colors.surface1 },
+              NeoTreeModified = { fg = colors.text },
+              NeoTreeFadeText1 = { fg = colors.surface1 },
+              NeoTreeFadeText2 = { fg = colors.surface1 },
+              NeoTreeDotfile = { fg = colors.surface1 },
+              NeoTreeDimText = { fg = colors.surface1 },
+              NeoTreeHiddenByName = { fg = colors.surface1 },
+              NeoTreeWindowsHidden = { fg = colors.surface1 },
             }
           end,
         },
