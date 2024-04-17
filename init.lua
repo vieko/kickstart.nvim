@@ -164,9 +164,6 @@ vim.keymap.set("n", "<A-l>", "<C-w><")
 vim.keymap.set("n", "<A-k>", "<C-w>+")
 vim.keymap.set("n", "<A-j>", "<C-w>-")
 
--- trigger emmet with <C-k>
-vim.api.nvim_set_keymap("i", "<C-k>", "<Plug>(emmet-expand-abbr)", { noremap = false })
-
 -- [[ AUTOCOMMANDS ]]
 -- see `:help lua-guide-autocommands`
 
@@ -209,6 +206,14 @@ require("lazy").setup({
     end,
   },
   {
+    "windwp/nvim-autopairs",
+    event = "InsertEnter",
+    config = true,
+    opts = {
+      enable_check_bracket_line = false,
+    },
+  },
+  {
     "github/copilot.vim",
     config = function()
       vim.keymap.set("i", "<C-Y>", 'copilot#Accept("\\<CR>")', {
@@ -224,6 +229,12 @@ require("lazy").setup({
     event = "VeryLazy",
     opts = {
       modes = {
+        treesitter = {
+          enabled = true,
+          highlight = {
+            backdrop = true,
+          },
+        },
         search = {
           enabled = true,
           highlight = { backdrop = true },
@@ -498,11 +509,25 @@ require("lazy").setup({
       local capabilities = vim.lsp.protocol.make_client_capabilities()
       capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
+      local function organize_imports()
+        local params = {
+          command = "_typescript.organizeImports",
+          arguments = { vim.api.nvim_buf_get_name(0) },
+          title = "",
+        }
+        vim.lsp.buf.execute_command(params)
+      end
+
       -- Enable the following language servers
       -- `:help lspconfig-all` for a list of all the pre-configured LSPs
       local servers = {
         bashls = {},
-        tsserver = {},
+        tsserver = {
+          --- @diagnostic disable-next-line: unused-local
+          on_attach = function(client, bufnr)
+            vim.keymap.set("n", "<leader>co", organize_imports, { desc = "LSP: [O]rganize imports", buffer = bufnr })
+          end,
+        },
         tailwindcss = {},
         lua_ls = {
           -- cmd = {...},
@@ -605,14 +630,12 @@ require("lazy").setup({
           return "make install_jsregexp"
         end)(),
         dependencies = {
-          -- `friendly-snippets` contains a variety of premade snippets.
-          --    https://github.com/rafamadriz/friendly-snippets
-          -- {
-          --   'rafamadriz/friendly-snippets',
-          --   config = function()
-          --     require('luasnip.loaders.from_vscode').lazy_load()
-          --   end,
-          -- },
+          {
+            "rafamadriz/friendly-snippets",
+            config = function()
+              require("luasnip.loaders.from_vscode").lazy_load()
+            end,
+          },
         },
       },
       "saadparwaiz1/cmp_luasnip",
@@ -657,7 +680,10 @@ require("lazy").setup({
               luasnip.jump(-1)
             end
           end, { "i", "s" }),
-          -- https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
+          -- <c-e> will cancel the completion.
+          ["<C-e>"] = cmp.mapping.abort(),
+          -- <cr> will confirm the completion.
+          ["<CR>"] = cmp.mapping.confirm({ select = true }),
         }),
         sources = {
           { name = "nvim_lsp" },
@@ -749,7 +775,6 @@ require("lazy").setup({
   { -- Collection of various small independent plugins/modules
     "echasnovski/mini.nvim",
     config = function()
-      require("mini.pairs").setup()
       -- better around/inside textobjects
       --  - va)  - [V]isually select [A]round [)]paren
       --  - yinq - [Y]ank [I]nside [N]ext [']quote
@@ -787,6 +812,7 @@ require("lazy").setup({
   { -- highlight, edit, and navigate code
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
+    dependencies = { "windwp/nvim-ts-autotag" },
     opts = {
       ensure_installed = { "bash", "c", "html", "lua", "luadoc", "markdown", "vim", "vimdoc" },
       auto_install = true,
@@ -796,8 +822,9 @@ require("lazy").setup({
         -- additional_vim_regex_highlighting = { "ruby" },
       },
       indent = { enable = true, disable = { "ruby" } },
+      autotag = { enable = true },
       incremental_selection = {
-        enable = true,
+        enable = false,
         keymaps = {
           init_selection = "gnn",
           node_incremental = "grn",
