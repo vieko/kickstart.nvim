@@ -784,7 +784,19 @@ require("lazy").setup({
       -- - saiw) - [S]urround [A]dd [I]nner [W]ord [)]Paren
       -- - sd'   - [S]urround [D]elete [']quotes
       -- - sr)'  - [S]urround [R]eplace [)] [']
-      require("mini.surround").setup()
+      require("mini.surround").setup({
+        mappings = {
+          add = "ca", -- Add surrounding in Normal and Visual modes
+          delete = "cd", -- Delete surrounding
+          find = "cf", -- Find surrounding (to the right)
+          find_left = "cF", -- Find surrounding (to the left)
+          highlight = "ch", -- Highlight surrounding
+          replace = "cr", -- Replace surrounding
+          update_n_lines = "cn", -- Update `n_lines`
+          suffix_last = "l", -- Suffix to search with "prev" method
+          suffix_next = "n", -- Suffix to search with "next" method
+        },
+      })
       -- simple and easy statusline.
       local statusline = require("mini.statusline")
       local active = function()
