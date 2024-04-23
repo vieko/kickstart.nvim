@@ -164,6 +164,14 @@ vim.keymap.set("n", "<A-l>", "<C-w><")
 vim.keymap.set("n", "<A-k>", "<C-w>+")
 vim.keymap.set("n", "<A-j>", "<C-w>-")
 
+-- navigate quickfix list
+vim.keymap.set("n", "[q", ":cprev<CR>zz", { desc = "Go to the previous [Q]uickfix item" })
+vim.keymap.set("n", "]q", ":cnext<CR>zz", { desc = "Go to the next [Q]uickfix item" })
+
+-- navigate location list
+vim.keymap.set("n", "[l", ":lprev<CR>zz", { desc = "Go to the previous [L]ocation item" })
+vim.keymap.set("n", "]l", ":lnext<CR>zz", { desc = "Go to the next [L]ocation item" })
+
 -- [[ AUTOCOMMANDS ]]
 -- see `:help lua-guide-autocommands`
 
@@ -224,33 +232,6 @@ require("lazy").setup({
     end,
   },
   {
-    "folke/trouble.nvim",
-    branch = "dev",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    opts = {
-      auto_close = false, -- does not work
-      auto_open = false, -- does not work
-      focus = true,
-      icons = {
-        folder_closed = " ",
-        folder_open = " ",
-      },
-    },
-    keys = {
-      {
-        "<leader>tt",
-        "<cmd>Trouble diagnostics toggle<cr>",
-        desc = "Toggle [T]rouble diagnostics",
-      },
-    },
-    modes = {
-      diagnostics_buffer = {
-        mode = "diagnostics",
-        filter = { buf = 0 },
-      },
-    },
-  },
-  {
     "folke/flash.nvim",
     event = "VeryLazy",
     opts = {
@@ -308,9 +289,8 @@ require("lazy").setup({
         ["<leader>c"] = { name = "[C]ode", _ = "which_key_ignore" },
         ["<leader>d"] = { name = "[D]ocument", _ = "which_key_ignore" },
         ["<leader>r"] = { name = "[R]ename", _ = "which_key_ignore" },
-        ["<leader>t"] = { name = "[T]rouble", _ = "which_key_ignore" },
+        ["<leader>t"] = { name = "[T]ree", _ = "which_key_ignore" },
         ["<leader>s"] = { name = "[S]earch", _ = "which_key_ignore" },
-        ["<leader>n"] = { name = "[N]eotree", _ = "which_key_ignore" },
         ["<leader>w"] = { name = "[W]orkspace", _ = "which_key_ignore" },
       })
     end,
@@ -324,7 +304,7 @@ require("lazy").setup({
       "MunifTanjim/nui.nvim",
     },
     init = function()
-      vim.keymap.set("n", "<leader>nn", "<Cmd>Neotree reveal toggle<CR>", { desc = "toggle [T]ree" })
+      vim.keymap.set("n", "<leader>tt", "<Cmd>Neotree reveal toggle<CR>", { desc = "toggle [T]ree" })
     end,
     config = function()
       require("neo-tree").setup({
